@@ -4,7 +4,7 @@
 
 #include <ngl/Camera.h>
 #include <ngl/Colour.h>
-#include <ngl/TransformStack.h>
+#include <ngl/Transformation.h>
 #include "RK4Spring.h"
 // must be included after our stuff becuase GLEW needs to be first
 #include <QtOpenGL>
