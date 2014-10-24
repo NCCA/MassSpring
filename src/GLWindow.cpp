@@ -82,7 +82,7 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
  // the shader will use the currently active material and light0 so set them
  ngl::Material m(ngl::SILVER);
  m.loadToShader("material");
- ngl::Light light(ngl::Vec3(2,2,2),ngl::Colour(1,1,1,1),ngl::Colour(1,1,1,1),ngl::POINTLIGHT);
+ ngl::Light light(ngl::Vec3(0,0,2),ngl::Colour(1,1,1,1),ngl::Colour(1,1,1,1),ngl::POINTLIGHT);
  // now create our light this is done after the camera so we can pass the
  // transpose of the projection matrix to the light to do correct eye space
  // transformations

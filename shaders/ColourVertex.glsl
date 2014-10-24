@@ -1,4 +1,4 @@
-#version 150
+#version 330 core
 
 
 uniform mat4 MVP;
@@ -8,7 +8,7 @@ in vec2 inUV;
 in vec3 inNormal;
 
 
-void main(void)
+void main()
 {
   gl_Position = MVP*vec4(inVert,1.0);
 }

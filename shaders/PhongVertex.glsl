@@ -1,4 +1,4 @@
-#version 150
+#version 330 core
 /// @brief flag to indicate if model has unit normals if not normalize
 uniform bool Normalize;
 // the eye position of the camera
@@ -16,14 +16,6 @@ in vec3 inNormal;
 in vec2 inUV;
 
 
-struct Materials
-{
-  vec4 ambient;
-  vec4 diffuse;
-  vec4 specular;
-  float shininess;
-};
-
 
 struct Lights
 {
@@ -39,8 +31,6 @@ struct Lights
     float linearAttenuation;
     float quadraticAttenuation;
 };
-// our material
-uniform Materials material;
 // array of lights
 uniform Lights light;
 // direction of the lights used for shading
