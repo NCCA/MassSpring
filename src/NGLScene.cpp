@@ -1,4 +1,4 @@
-#include "GLWindow.h"
+#include "NGLScene.h"
 #include <iostream>
 #include <ngl/Camera.h>
 #include <ngl/Colour.h>
@@ -12,11 +12,11 @@
 #include <ngl/VAOPrimitives.h>
 #include <ngl/ShaderLib.h>
 #include <boost/foreach.hpp>
-
+#include <QMouseEvent>
 
 
 //----------------------------------------------------------------------------------------------------------------------
-GLWindow::GLWindow(const QGLFormat _format, int _timer, QWidget *_parent ) : QGLWidget( _format, _parent )
+NGLScene::NGLScene(int _timer, QWidget *_parent ) : QOpenGLWidget(_parent )
 {
   // set this widget to have the initial keyboard focus
   setFocus();
@@ -37,7 +37,7 @@ GLWindow::GLWindow(const QGLFormat _format, int _timer, QWidget *_parent ) : QGL
 // This function should set up any required OpenGL context rendering flags, defining display lists, etc.
 
 //----------------------------------------------------------------------------------------------------------------------
-void GLWindow::initializeGL()
+void NGLScene::initializeGL()
 {
 ngl::NGLInit::instance();
 glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
@@ -116,13 +116,13 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
 //----------------------------------------------------------------------------------------------------------------------
 //This virtual function is called whenever the widget has been resized.
 // The new size is passed in width and height.
-void GLWindow::resizeGL( int _w, int _h)
+void NGLScene::resizeGL( int _w, int _h)
 {
   glViewport(0,0,_w,_h);
   m_cam->setShape(45,(float)_w/_h,0.5,150);
 }
 
-void GLWindow::loadMatricesToShader()
+void NGLScene::loadMatricesToShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["Phong"]->use();
@@ -142,7 +142,7 @@ void GLWindow::loadMatricesToShader()
   shader->setShaderParamFromMat4("M",M);
 }
 
-void GLWindow::loadMatricesToColourShader()
+void NGLScene::loadMatricesToColourShader()
 {
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["Colour"]->use();
@@ -156,7 +156,7 @@ void GLWindow::loadMatricesToColourShader()
 //----------------------------------------------------------------------------------------------------------------------
 //This virtual function is called whenever the widget needs to be painted.
 // this is our main drawing routine
-void GLWindow::paintGL()
+void NGLScene::paintGL()
 {
   // grab an instance of the shader manager
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -234,7 +234,7 @@ void GLWindow::paintGL()
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void GLWindow::mouseMoveEvent ( QMouseEvent * _event )
+void NGLScene::mouseMoveEvent ( QMouseEvent * _event )
 {
   // note the method buttons() is the button state when event was called
   // this is different from button() which is used to check which button was
@@ -247,12 +247,12 @@ void GLWindow::mouseMoveEvent ( QMouseEvent * _event )
     m_origY = _event->y();
   }
   // re-draw GL
-  updateGL();
+  update();
 }
 
 
 //----------------------------------------------------------------------------------------------------------------------
-void GLWindow::mousePressEvent ( QMouseEvent * _event  )
+void NGLScene::mousePressEvent ( QMouseEvent * _event  )
 {
   // this method is called when the mouse button is pressed in this case we
   // store the value where the maouse was clicked (x,y) and set the Rotate flag to true
@@ -265,7 +265,7 @@ void GLWindow::mousePressEvent ( QMouseEvent * _event  )
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-void GLWindow::mouseReleaseEvent ( QMouseEvent * _event )
+void NGLScene::mouseReleaseEvent ( QMouseEvent * _event )
 {
   // this event is called when the mouse button is released
   // we then set Rotate to false
@@ -275,25 +275,24 @@ void GLWindow::mouseReleaseEvent ( QMouseEvent * _event )
   }
 }
 
-void GLWindow::timerEvent( QTimerEvent *_event)
+void NGLScene::timerEvent( QTimerEvent *_event)
 {
 	m_spring->update();
-	updateGL();
+	update();
 }
 
-GLWindow::~GLWindow()
+NGLScene::~NGLScene()
 {
 	ngl::NGLInit *init = ngl::NGLInit::instance();
-	init->NGLQuit();
 }
 
-void GLWindow::startSimTimer()
+void NGLScene::startSimTimer()
 {
 
 m_timer=startTimer(m_timerValue);
 }
 
-void GLWindow::stopSimTimer()
+void NGLScene::stopSimTimer()
 {
  killTimer(m_timer);
 }

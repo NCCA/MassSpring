@@ -1,5 +1,5 @@
-#ifndef __GL_WINDOW_H__
-#define __GL_WINDOW_H__
+#ifndef NGLSCENE_H__
+#define NGLSCENE_H__
 
 
 #include <ngl/Camera.h>
@@ -7,10 +7,9 @@
 #include <ngl/Transformation.h>
 #include "RK4Spring.h"
 // must be included after our stuff becuase GLEW needs to be first
-#include <QtOpenGL>
-
+#include <QOpenGLWidget>
 //----------------------------------------------------------------------------------------------------------------------
-/// @file GLWindow.h
+/// @file NGLScene.h
 /// @brief a basic Qt GL window class for ngl demos
 /// @author Jonathan Macey
 /// @version 1.0
@@ -21,7 +20,7 @@
 /// @brief our main glwindow widget for NGL applications all drawing elements are
 /// put in this file
 //----------------------------------------------------------------------------------------------------------------------
-class GLWindow : public QGLWidget
+class NGLScene : public QOpenGLWidget
 {
 Q_OBJECT        // must include this if you use Qt signals/slots
 public :
@@ -30,11 +29,11 @@ public :
 	/// @param[in] _timer the time value for simulation updates
   /// @param [in] _parent the parent window to create the GL context in
 	//----------------------------------------------------------------------------------------------------------------------
-	GLWindow(const QGLFormat _format, int _timer,QWidget *_parent );
+	NGLScene(int _timer,QWidget *_parent );
 	//----------------------------------------------------------------------------------------------------------------------
 	/// @brief dtor
 	//----------------------------------------------------------------------------------------------------------------------
-	~GLWindow();
+	~NGLScene();
 	//----------------------------------------------------------------------------------------------------------------------
 	/// @brief set the spring to use
 	/// @param[in] _s the spring

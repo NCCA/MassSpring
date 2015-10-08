@@ -4,16 +4,12 @@
 //----------------------------------------------------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget *parent) :QMainWindow(parent), m_ui(new Ui::MainWindow)
 {
-  // create an openGL format and pass to the new GLWidget
-  QGLFormat format;
-  format.setVersion(3,2);
-  format.setProfile( QGLFormat::CoreProfile);
 
 
 	// setup the user interface
 	m_ui->setupUi(this);
 	// create our GL window for drawing the spring
-	m_gl=new  GLWindow(format,m_ui->m_timerValue->value(),this);
+	m_gl=new  NGLScene(m_ui->m_timerValue->value(),this);
 	// add the glWindow to the UI
 	m_ui->s_mainWindowGridLayout->addWidget(m_gl,0,0,4,1);
 	// create a new spring using the defaul ui values
