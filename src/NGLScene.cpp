@@ -60,8 +60,8 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
  // we are creating a shader called Phong
  shader->createShaderProgram("Phong");
  // now we are going to create empty shaders for Frag and Vert
- shader->attachShader("PhongVertex",ngl::VERTEX);
- shader->attachShader("PhongFragment",ngl::FRAGMENT);
+ shader->attachShader("PhongVertex",ngl::ShaderType::VERTEX);
+ shader->attachShader("PhongFragment",ngl::ShaderType::FRAGMENT);
  // attach the source
  shader->loadShaderSource("PhongVertex","shaders/PhongVertex.glsl");
  shader->loadShaderSource("PhongFragment","shaders/PhongFragment.glsl");
@@ -95,8 +95,8 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
  light.loadToShader("light");
  shader->createShaderProgram("Colour");
 
- shader->attachShader("ColourVertex",ngl::VERTEX);
- shader->attachShader("ColourFragment",ngl::FRAGMENT);
+ shader->attachShader("ColourVertex",ngl::ShaderType::VERTEX);
+ shader->attachShader("ColourFragment",ngl::ShaderType::FRAGMENT);
  shader->loadShaderSource("ColourVertex","shaders/ColourVertex.glsl");
  shader->loadShaderSource("ColourFragment","shaders/ColourFragment.glsl");
 
