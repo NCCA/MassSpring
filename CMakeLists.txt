@@ -17,6 +17,8 @@ set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp
 			${PROJECT_SOURCE_DIR}/include/AbstractRK4Integrator.h 
 			${PROJECT_SOURCE_DIR}/include/RK4Spring.h
 	)
+# use C++ 11
+set(CMAKE_CXX_STANDARD 11)
 
 # NGL also needs the OpenGL framework from Qt so add it Also as this demo uses 
 # a UI these modules need to be imported before we can use the qt5_wrap_ui module.
