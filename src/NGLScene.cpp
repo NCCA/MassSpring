@@ -50,10 +50,10 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
  ngl::Vec3 to(0,0,0);
  ngl::Vec3 up(0,1,0);
  ngl::NGLInit::instance();
- m_cam= new ngl::Camera(from,to,up);
+ m_cam.set(from,to,up);
  // set the shape using FOV 45 Aspect Ratio based on Width and Height
  // The final two are near and far clipping planes of 0.5 and 10
- m_cam->setShape(45,(float)720.0/576.0,0.5,150);
+ m_cam.setShape(45,(float)720.0/576.0,0.5,150);
  // now to load the shader and set the values
  // grab an instance of shader manager
  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
@@ -86,7 +86,7 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
  // now create our light this is done after the camera so we can pass the
  // transpose of the projection matrix to the light to do correct eye space
  // transformations
- ngl::Mat4 iv=m_cam->getViewMatrix();
+ ngl::Mat4 iv=m_cam.getViewMatrix();
  iv.transpose();
  light.setTransform(iv);
  light.setAttenuation(1,0,0);
@@ -116,10 +116,12 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
 //----------------------------------------------------------------------------------------------------------------------
 //This virtual function is called whenever the widget has been resized.
 // The new size is passed in width and height.
-void NGLScene::resizeGL( int _w, int _h)
+void NGLScene::resizeGL(int _w, int _h)
 {
-  glViewport(0,0,_w,_h);
-  m_cam->setShape(45,(float)_w/_h,0.5,150);
+  m_width=_w*devicePixelRatio();
+  m_height=_h*devicePixelRatio();
+  // now set the camera size values as the screen size has changed
+  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
 }
 
 void NGLScene::loadMatricesToShader()
@@ -132,8 +134,8 @@ void NGLScene::loadMatricesToShader()
   ngl::Mat3 normalMatrix;
   ngl::Mat4 M;
   M=m_transform.getMatrix();
-  MV=M*m_mouseGlobalTX*m_cam->getViewMatrix() ;
-  MVP=MV*m_cam->getProjectionMatrix();
+  MV=M*m_mouseGlobalTX*m_cam.getViewMatrix() ;
+  MVP=MV*m_cam.getProjectionMatrix();
   normalMatrix=MV;
   normalMatrix.inverse();
   shader->setShaderParamFromMat4("MV",MV);
@@ -147,7 +149,7 @@ void NGLScene::loadMatricesToColourShader()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["Colour"]->use();
   ngl::Mat4 MVP;
-  MVP=m_transform.getMatrix()*m_mouseGlobalTX*m_cam->getVPMatrix() ;
+  MVP=m_transform.getMatrix()*m_mouseGlobalTX*m_cam.getVPMatrix() ;
   shader->setShaderParamFromMat4("MVP",MVP);
 
 }
