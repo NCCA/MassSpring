@@ -8,6 +8,7 @@
 #include "RK4Spring.h"
 // must be included after our stuff becuase GLEW needs to be first
 #include <QOpenGLWidget>
+#include <memory>
 //----------------------------------------------------------------------------------------------------------------------
 /// @file NGLScene.h
 /// @brief a basic Qt GL window class for ngl demos
