@@ -10,6 +10,8 @@
 #include <ngl/Obj.h>
 #include <ngl/Random.h>
 #include <ngl/VAOPrimitives.h>
+#include <ngl/VAOFactory.h>
+#include <ngl/SimpleVAO.h>
 #include <ngl/ShaderLib.h>
 #include <boost/foreach.hpp>
 #include <QMouseEvent>
@@ -22,12 +24,6 @@ NGLScene::NGLScene(int _timer, QWidget *_parent ) : QOpenGLWidget(_parent )
   setFocus();
   // re-size the widget to that of the parent (in this case the GLFrame passed in on construction)
   this->resize(_parent->size());
-  // Now set the initial GLWindow attributes to default values
-  // Roate is false
-  m_rotate=false;
-  // mouse rotation values set to 0
-  m_spinXFace=0;
-  m_spinYFace=0;
 	m_timerValue=_timer;
 	startSimTimer();
 }
@@ -116,12 +112,11 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
 //----------------------------------------------------------------------------------------------------------------------
 //This virtual function is called whenever the widget has been resized.
 // The new size is passed in width and height.
-void NGLScene::resizeGL(int _w, int _h)
+void NGLScene::resizeGL( int _w, int _h )
 {
-  m_width=_w*devicePixelRatio();
-  m_height=_h*devicePixelRatio();
-  // now set the camera size values as the screen size has changed
-  m_cam.setShape(45.0f,(float)width()/height(),0.05f,350.0f);
+  m_cam.setShape( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
+  m_win.width  = static_cast<int>( _w * devicePixelRatio() );
+  m_win.height = static_cast<int>( _h * devicePixelRatio() );
 }
 
 void NGLScene::loadMatricesToShader()
@@ -171,8 +166,8 @@ void NGLScene::paintGL()
   ngl::Mat4 rotX;
   ngl::Mat4 rotY;
   // create the rotation matrices
-  rotX.rotateX(m_spinXFace);
-  rotY.rotateY(m_spinYFace);
+  rotX.rotateX(m_win.spinXFace);
+  rotY.rotateY(m_win.spinYFace);
   // multiply the rotations
   m_mouseGlobalTX=rotY*rotX;
   // draw spring lines
@@ -185,14 +180,13 @@ void NGLScene::paintGL()
   m_transform.reset();
   loadMatricesToColourShader();
   // load transform stack
-  ngl::VertexArrayObject *vao=ngl::VertexArrayObject::createVOA(GL_LINES);
+  std::unique_ptr<ngl::AbstractVAO> vao(ngl::VAOFactory::createVAO("simpleVAO",GL_LINES));
   vao->bind();
-  vao->setData(2*sizeof(ngl::Vec3),points[0].m_x);
+  vao->setData(ngl::AbstractVAO::VertexData(2*sizeof(ngl::Vec3),points[0].m_x));
   vao->setNumIndices(2);
   vao->setVertexAttributePointer(0,3,GL_FLOAT,0,0);
   vao->draw();
   vao->unbind();
-  vao->removeVOA();
 
 
   // get an instance of the VBO primitives for drawing
@@ -201,7 +195,7 @@ void NGLScene::paintGL()
   shader->use("Phong");
 
   shader->setShaderParam4f("Colour",1.0,0.0,0.0,1.0);
-  m_transform.setScale(0.1,0.1,0.1);
+  m_transform.setScale(0.1f,0.1f,0.1f);
   m_transform.setPosition(m_spring->getAPosition());
   loadMatricesToShader();
   // draw the cube
@@ -232,52 +226,7 @@ void NGLScene::paintGL()
 }
 
 
-
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void NGLScene::mouseMoveEvent ( QMouseEvent * _event )
-{
-  // note the method buttons() is the button state when event was called
-  // this is different from button() which is used to check which button was
-  // pressed when the mousePress/Release event is generated
-  if(m_rotate && _event->buttons() == Qt::LeftButton)
-  {
-    m_spinYFace = ( m_spinYFace + (_event->x() - m_origX) ) % 360 ;
-    m_spinXFace = ( m_spinXFace + (_event->y() - m_origY) ) % 360 ;
-    m_origX = _event->x();
-    m_origY = _event->y();
-  }
-  // re-draw GL
-  update();
-}
-
-
-//----------------------------------------------------------------------------------------------------------------------
-void NGLScene::mousePressEvent ( QMouseEvent * _event  )
-{
-  // this method is called when the mouse button is pressed in this case we
-  // store the value where the maouse was clicked (x,y) and set the Rotate flag to true
-  if(_event->button() == Qt::LeftButton)
-  {
-    m_origX = _event->x();
-    m_origY = _event->y();
-    m_rotate =true;
-  }
-}
-
-//----------------------------------------------------------------------------------------------------------------------
-void NGLScene::mouseReleaseEvent ( QMouseEvent * _event )
-{
-  // this event is called when the mouse button is released
-  // we then set Rotate to false
-  if (_event->button() == Qt::LeftButton)
-  {
-    m_rotate=false;
-  }
-}
-
-void NGLScene::timerEvent( QTimerEvent *_event)
+void NGLScene::timerEvent( QTimerEvent *)
 {
 	m_spring->update();
 	update();
