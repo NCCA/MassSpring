@@ -72,7 +72,7 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
  shader->linkProgramObject("Phong");
  // and make it active ready to load values
  (*shader)["Phong"]->use();
- shader->setShaderParam1i("Normalize",1);
+ shader->setUniform("Normalize",1);
 
  // now pass the modelView and projection values to the shader
  // the shader will use the currently active material and light0 so set them
@@ -133,10 +133,10 @@ void NGLScene::loadMatricesToShader()
   MVP=MV*m_cam.getProjectionMatrix();
   normalMatrix=MV;
   normalMatrix.inverse();
-  shader->setShaderParamFromMat4("MV",MV);
-  shader->setShaderParamFromMat4("MVP",MVP);
-  shader->setShaderParamFromMat3("normalMatrix",normalMatrix);
-  shader->setShaderParamFromMat4("M",M);
+  shader->setUniform("MV",MV);
+  shader->setUniform("MVP",MVP);
+  shader->setUniform("normalMatrix",normalMatrix);
+  shader->setUniform("M",M);
 }
 
 void NGLScene::loadMatricesToColourShader()
@@ -145,7 +145,7 @@ void NGLScene::loadMatricesToColourShader()
   (*shader)["Colour"]->use();
   ngl::Mat4 MVP;
   MVP=m_transform.getMatrix()*m_mouseGlobalTX*m_cam.getVPMatrix() ;
-  shader->setShaderParamFromMat4("MVP",MVP);
+  shader->setUniform("MVP",MVP);
 
 }
 
@@ -176,7 +176,7 @@ void NGLScene::paintGL()
   std::vector<ngl::Vec3> points(2);
   points[0]=m_spring->getAPosition();
   points[1]=m_spring->getBPosition();
-  shader->setShaderParam4f("Colour",1.0,1.0,1.0,1.0);
+  shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
   m_transform.reset();
   loadMatricesToColourShader();
   // load transform stack
@@ -194,7 +194,7 @@ void NGLScene::paintGL()
 
   shader->use("Phong");
 
-  shader->setShaderParam4f("Colour",1.0,0.0,0.0,1.0);
+  shader->setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
   m_transform.setScale(0.1f,0.1f,0.1f);
   m_transform.setPosition(m_spring->getAPosition());
   loadMatricesToShader();
@@ -202,22 +202,22 @@ void NGLScene::paintGL()
   prim->draw("cube");
 
 
-  shader->setShaderParam4f("Colour",0.0,1.0,0.0,1.0);
-  m_transform.setScale(0.1,0.1,0.1);
+  shader->setUniform("Colour",0.0f,1.0f,0.0f,1.0f);
+  m_transform.setScale(0.1f,0.1f,0.1f);
   m_transform.setPosition(m_spring->getBPosition());
   loadMatricesToShader();
   // draw the sphere
   prim->draw("cube");
   // draw the target points
-  shader->setShaderParam4f("Colour",1.0,0.0,0.0,1.0);
-  m_transform.setScale(0.1,0.1,0.1);
+  shader->setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
+  m_transform.setScale(0.1f,0.1f,0.1f);
   m_transform.setPosition(m_spring->getInitialAPosition());
   loadMatricesToShader();
   // draw the cube
   prim->draw("sphere");
-  shader->setShaderParam4f("Colour",0.0,1.0,0.0,1.0);
+  shader->setUniform("Colour",0.0f,1.0f,0.0f,1.0f);
 
-  m_transform.setScale(0.1,0.1,0.1);
+  m_transform.setScale(0.1f,0.1f,0.1f);
   m_transform.setPosition(m_spring->getInitialBPosition());
   loadMatricesToShader();
 
