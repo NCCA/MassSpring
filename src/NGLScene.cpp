@@ -83,10 +83,8 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
  // transpose of the projection matrix to the light to do correct eye space
  // transformations
  ngl::Mat4 iv=m_cam.getViewMatrix();
- iv.transpose();
+ iv.inverse().transpose();
  light.setTransform(iv);
- light.setAttenuation(1,0,0);
- light.enable();
  // load these values to the shader as well
  light.loadToShader("light");
  shader->createShaderProgram("Colour");
@@ -129,10 +127,10 @@ void NGLScene::loadMatricesToShader()
   ngl::Mat3 normalMatrix;
   ngl::Mat4 M;
   M=m_transform.getMatrix();
-  MV=M*m_mouseGlobalTX*m_cam.getViewMatrix() ;
-  MVP=MV*m_cam.getProjectionMatrix();
+  MV=m_cam.getViewMatrix() *m_mouseGlobalTX*M;
+  MVP=m_cam.getProjectionMatrix()*MV;
   normalMatrix=MV;
-  normalMatrix.inverse();
+  normalMatrix.inverse().transpose();
   shader->setUniform("MV",MV);
   shader->setUniform("MVP",MVP);
   shader->setUniform("normalMatrix",normalMatrix);
@@ -144,7 +142,9 @@ void NGLScene::loadMatricesToColourShader()
   ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   (*shader)["Colour"]->use();
   ngl::Mat4 MVP;
-  MVP=m_transform.getMatrix()*m_mouseGlobalTX*m_cam.getVPMatrix() ;
+  MVP = m_cam.getVPMatrix() *
+        m_mouseGlobalTX*
+        m_transform.getMatrix();
   shader->setUniform("MVP",MVP);
 
 }
