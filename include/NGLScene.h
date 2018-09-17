@@ -1,14 +1,10 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
 
-
-#include <ngl/Camera.h>
-#include <ngl/Colour.h>
+#include <QOpenGLWidget>
 #include <ngl/Transformation.h>
 #include "WindowParams.h"
 #include "RK4Spring.h"
-// must be included after our stuff becuase GLEW needs to be first
-#include <QOpenGLWidget>
 #include <memory>
 //----------------------------------------------------------------------------------------------------------------------
 /// @file NGLScene.h
@@ -76,7 +72,8 @@ private :
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Our Camera
 	//----------------------------------------------------------------------------------------------------------------------
-	ngl::Camera m_cam;
+  ngl::Mat4 m_view;
+  ngl::Mat4 m_project;
 	//----------------------------------------------------------------------------------------------------------------------
   /// @brief transformation stack for the gl transformations etc
 	//----------------------------------------------------------------------------------------------------------------------

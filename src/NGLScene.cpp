@@ -1,20 +1,12 @@
+#include <QMouseEvent>
 #include "NGLScene.h"
 #include <iostream>
-#include <ngl/Camera.h>
-#include <ngl/Colour.h>
-#include <ngl/Light.h>
-#include <ngl/Mat4.h>
 #include <ngl/Transformation.h>
-#include <ngl/Material.h>
 #include <ngl/NGLInit.h>
-#include <ngl/Obj.h>
-#include <ngl/Random.h>
 #include <ngl/VAOPrimitives.h>
 #include <ngl/VAOFactory.h>
 #include <ngl/SimpleVAO.h>
 #include <ngl/ShaderLib.h>
-#include <boost/foreach.hpp>
-#include <QMouseEvent>
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -42,69 +34,23 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
  // Now we will create a basic Camera from the graphics library
  // This is a static camera so it only needs to be set once
  // First create Values for the camera position
- ngl::Vec3 from(0,0,5);
+ ngl::Vec3 from(0,0,7);
  ngl::Vec3 to(0,0,0);
  ngl::Vec3 up(0,1,0);
  ngl::NGLInit::instance();
- m_cam.set(from,to,up);
+ m_view=ngl::lookAt(from,to,up);
  // set the shape using FOV 45 Aspect Ratio based on Width and Height
  // The final two are near and far clipping planes of 0.5 and 10
- m_cam.setShape(45,(float)720.0/576.0,0.5,150);
- // now to load the shader and set the values
- // grab an instance of shader manager
- ngl::ShaderLib *shader=ngl::ShaderLib::instance();
- // we are creating a shader called Phong
- shader->createShaderProgram("Phong");
- // now we are going to create empty shaders for Frag and Vert
- shader->attachShader("PhongVertex",ngl::ShaderType::VERTEX);
- shader->attachShader("PhongFragment",ngl::ShaderType::FRAGMENT);
- // attach the source
- shader->loadShaderSource("PhongVertex","shaders/PhongVertex.glsl");
- shader->loadShaderSource("PhongFragment","shaders/PhongFragment.glsl");
- // compile the shaders
- shader->compileShader("PhongVertex");
- shader->compileShader("PhongFragment");
- // add them to the program
- shader->attachShaderToProgram("Phong","PhongVertex");
- shader->attachShaderToProgram("Phong","PhongFragment");
-
- // now we have associated this data we can link the shader
- shader->linkProgramObject("Phong");
- // and make it active ready to load values
- (*shader)["Phong"]->use();
- shader->setUniform("Normalize",1);
-
- // now pass the modelView and projection values to the shader
- // the shader will use the currently active material and light0 so set them
- ngl::Material m(ngl::STDMAT::SILVER);
- m.loadToShader("material");
- ngl::Light light(ngl::Vec3(0,0,2),ngl::Colour(1,1,1,1),ngl::Colour(1,1,1,1),ngl::LightModes::POINTLIGHT);
- // now create our light this is done after the camera so we can pass the
- // transpose of the projection matrix to the light to do correct eye space
- // transformations
- ngl::Mat4 iv=m_cam.getViewMatrix();
- iv.inverse().transpose();
- light.setTransform(iv);
- // load these values to the shader as well
- light.loadToShader("light");
- shader->createShaderProgram("Colour");
-
- shader->attachShader("ColourVertex",ngl::ShaderType::VERTEX);
- shader->attachShader("ColourFragment",ngl::ShaderType::FRAGMENT);
- shader->loadShaderSource("ColourVertex","shaders/ColourVertex.glsl");
- shader->loadShaderSource("ColourFragment","shaders/ColourFragment.glsl");
-
- shader->compileShader("ColourVertex");
- shader->compileShader("ColourFragment");
- shader->attachShaderToProgram("Colour","ColourVertex");
- shader->attachShaderToProgram("Colour","ColourFragment");
-
- shader->bindAttribute("Colour",0,"inVert");
-
- shader->linkProgramObject("Colour");
+ m_project=ngl::perspective(45.0f,720.0f/576.0f,0.5f,150.0f);
 
  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
  prim->createSphere("sphere",1.0,20);
+ auto *shader=ngl::ShaderLib::instance();
+ shader->use(ngl::nglDiffuseShader);
+ shader->setUniform("Colour",1.0f,1.0f,0.0f,1.0f);
+ shader->setUniform("lightPos",1.0f,1.0f,1.0f);
+ shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
+
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -112,23 +58,23 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
 // The new size is passed in width and height.
 void NGLScene::resizeGL( int _w, int _h )
 {
-  m_cam.setShape( 45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
+  m_project=ngl::perspective(45.0f, static_cast<float>( _w ) / _h, 0.05f, 350.0f );
   m_win.width  = static_cast<int>( _w * devicePixelRatio() );
   m_win.height = static_cast<int>( _h * devicePixelRatio() );
 }
 
 void NGLScene::loadMatricesToShader()
 {
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["Phong"]->use();
+  auto *shader=ngl::ShaderLib::instance();
+  (*shader)[ngl::nglDiffuseShader]->use();
 
   ngl::Mat4 MV;
   ngl::Mat4 MVP;
   ngl::Mat3 normalMatrix;
   ngl::Mat4 M;
   M=m_transform.getMatrix();
-  MV=m_cam.getViewMatrix() *m_mouseGlobalTX*M;
-  MVP=m_cam.getProjectionMatrix()*MV;
+  MV=m_view *m_mouseGlobalTX*M;
+  MVP=m_project*MV;
   normalMatrix=MV;
   normalMatrix.inverse().transpose();
   shader->setUniform("MV",MV);
@@ -139,10 +85,10 @@ void NGLScene::loadMatricesToShader()
 
 void NGLScene::loadMatricesToColourShader()
 {
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
-  (*shader)["Colour"]->use();
+  auto *shader=ngl::ShaderLib::instance();
+  (*shader)[ngl::nglColourShader]->use();
   ngl::Mat4 MVP;
-  MVP = m_cam.getVPMatrix() *
+  MVP = m_project*m_view *
         m_mouseGlobalTX*
         m_transform.getMatrix();
   shader->setUniform("MVP",MVP);
@@ -171,7 +117,7 @@ void NGLScene::paintGL()
   // multiply the rotations
   m_mouseGlobalTX=rotY*rotX;
   // draw spring lines
-  shader->use("Colour");
+  shader->use(ngl::nglColourShader);
   // get our position values and put in a vector
   std::vector<ngl::Vec3> points(2);
   points[0]=m_spring->getAPosition();
@@ -192,7 +138,7 @@ void NGLScene::paintGL()
   // get an instance of the VBO primitives for drawing
   ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
-  shader->use("Phong");
+  shader->use(ngl::nglDiffuseShader);
 
   shader->setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
   m_transform.setScale(0.1f,0.1f,0.1f);
