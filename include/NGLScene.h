@@ -1,10 +1,10 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
 
-#include <QOpenGLWidget>
 #include <ngl/Transformation.h>
 #include "WindowParams.h"
 #include "RK4Spring.h"
+#include <QOpenGLWidget>
 #include <memory>
 //----------------------------------------------------------------------------------------------------------------------
 /// @file NGLScene.h
