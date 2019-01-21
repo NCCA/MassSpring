@@ -11,6 +11,7 @@ set(SOURCES ${PROJECT_SOURCE_DIR}/src/main.cpp
 			${PROJECT_SOURCE_DIR}/src/MainWindow.cpp  
 			${PROJECT_SOURCE_DIR}/src/NGLScene.cpp 
 			${PROJECT_SOURCE_DIR}/src/AbstractRK4Integrator.cpp  
+			${PROJECT_SOURCE_DIR}/src/NGLSceneMouseControls.cpp
 			${PROJECT_SOURCE_DIR}/src/RK4Spring.cpp
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h 
 			${PROJECT_SOURCE_DIR}/include/MainWindow.h 
@@ -26,9 +27,9 @@ find_package(Qt5OpenGL)
 find_package(Qt5Widgets)
 find_package(Qt5Gui)
 find_package(Qt5Core)
-qt5_wrap_ui(UIS_HDRS ui/MainWindow.ui)
 #This demo uses a UI so we need to add this to run UIC
-set(CMAKE_AUTOUIC ON)
+#set(CMAKE_AUTOUIC ON)
+qt5_wrap_ui(UIS_HDRS ${PROJECT_SOURCE_DIR}/ui/MainWindow.ui)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Instruct CMake to run moc automatically when needed.
