@@ -27,7 +27,7 @@ NGLScene::NGLScene(int _timer, QWidget *_parent ) : QOpenGLWidget(_parent )
 //----------------------------------------------------------------------------------------------------------------------
 void NGLScene::initializeGL()
 {
-ngl::NGLInit::instance();
+ngl::NGLInit::initialize();
 glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
 // enable depth testing for drawing
  glEnable(GL_DEPTH_TEST);
@@ -37,19 +37,17 @@ glClearColor(0.4f, 0.4f, 0.4f, 1.0f);			   // Grey Background
  ngl::Vec3 from(0,0,7);
  ngl::Vec3 to(0,0,0);
  ngl::Vec3 up(0,1,0);
- ngl::NGLInit::instance();
+ 
  m_view=ngl::lookAt(from,to,up);
  // set the shape using FOV 45 Aspect Ratio based on Width and Height
  // The final two are near and far clipping planes of 0.5 and 10
  m_project=ngl::perspective(45.0f,720.0f/576.0f,0.5f,150.0f);
 
- ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
- prim->createSphere("sphere",1.0,20);
- auto *shader=ngl::ShaderLib::instance();
- shader->use(ngl::nglDiffuseShader);
- shader->setUniform("Colour",1.0f,1.0f,0.0f,1.0f);
- shader->setUniform("lightPos",1.0f,1.0f,1.0f);
- shader->setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
+ ngl::VAOPrimitives::createSphere("sphere",1.0,20);
+ ngl::ShaderLib::use(ngl::nglDiffuseShader);
+ ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,0.0f,1.0f);
+ ngl::ShaderLib::setUniform("lightPos",1.0f,1.0f,1.0f);
+ ngl::ShaderLib::setUniform("lightDiffuse",1.0f,1.0f,1.0f,1.0f);
 
 }
 
@@ -65,9 +63,7 @@ void NGLScene::resizeGL( int _w, int _h )
 
 void NGLScene::loadMatricesToShader()
 {
-  auto *shader=ngl::ShaderLib::instance();
-  (*shader)[ngl::nglDiffuseShader]->use();
-
+  ngl::ShaderLib::use(ngl::nglDiffuseShader);
   ngl::Mat4 MV;
   ngl::Mat4 MVP;
   ngl::Mat3 normalMatrix;
@@ -77,21 +73,20 @@ void NGLScene::loadMatricesToShader()
   MVP=m_project*MV;
   normalMatrix=MV;
   normalMatrix.inverse().transpose();
-  shader->setUniform("MV",MV);
-  shader->setUniform("MVP",MVP);
-  shader->setUniform("normalMatrix",normalMatrix);
-  shader->setUniform("M",M);
+  ngl::ShaderLib::setUniform("MV",MV);
+  ngl::ShaderLib::setUniform("MVP",MVP);
+  ngl::ShaderLib::setUniform("normalMatrix",normalMatrix);
+  ngl::ShaderLib::setUniform("M",M);
 }
 
 void NGLScene::loadMatricesToColourShader()
 {
-  auto *shader=ngl::ShaderLib::instance();
-  (*shader)[ngl::nglColourShader]->use();
+  ngl::ShaderLib::use(ngl::nglColourShader);
   ngl::Mat4 MVP;
   MVP = m_project*m_view *
         m_mouseGlobalTX*
         m_transform.getMatrix();
-  shader->setUniform("MVP",MVP);
+  ngl::ShaderLib::setUniform("MVP",MVP);
 
 }
 
@@ -101,8 +96,6 @@ void NGLScene::loadMatricesToColourShader()
 // this is our main drawing routine
 void NGLScene::paintGL()
 {
-  // grab an instance of the shader manager
-  ngl::ShaderLib *shader=ngl::ShaderLib::instance();
   // clear the screen and depth buffer
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -117,12 +110,12 @@ void NGLScene::paintGL()
   // multiply the rotations
   m_mouseGlobalTX=rotY*rotX;
   // draw spring lines
-  shader->use(ngl::nglColourShader);
+  ngl::ShaderLib::use(ngl::nglColourShader);
   // get our position values and put in a vector
   std::vector<ngl::Vec3> points(2);
   points[0]=m_spring->getAPosition();
   points[1]=m_spring->getBPosition();
-  shader->setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
+  ngl::ShaderLib::setUniform("Colour",1.0f,1.0f,1.0f,1.0f);
   m_transform.reset();
   loadMatricesToColourShader();
   // load transform stack
@@ -135,40 +128,38 @@ void NGLScene::paintGL()
   vao->unbind();
 
 
-  // get an instance of the VBO primitives for drawing
-  ngl::VAOPrimitives *prim=ngl::VAOPrimitives::instance();
 
-  shader->use(ngl::nglDiffuseShader);
+  ngl::ShaderLib::use(ngl::nglDiffuseShader);
 
-  shader->setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
+  ngl::ShaderLib::setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
   m_transform.setScale(0.1f,0.1f,0.1f);
   m_transform.setPosition(m_spring->getAPosition());
   loadMatricesToShader();
   // draw the cube
-  prim->draw("cube");
+  ngl::VAOPrimitives::draw("cube");
 
 
-  shader->setUniform("Colour",0.0f,1.0f,0.0f,1.0f);
+  ngl::ShaderLib::setUniform("Colour",0.0f,1.0f,0.0f,1.0f);
   m_transform.setScale(0.1f,0.1f,0.1f);
   m_transform.setPosition(m_spring->getBPosition());
   loadMatricesToShader();
   // draw the sphere
-  prim->draw("cube");
+  ngl::VAOPrimitives::draw("cube");
   // draw the target points
-  shader->setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
+  ngl::ShaderLib::setUniform("Colour",1.0f,0.0f,0.0f,1.0f);
   m_transform.setScale(0.1f,0.1f,0.1f);
   m_transform.setPosition(m_spring->getInitialAPosition());
   loadMatricesToShader();
   // draw the cube
-  prim->draw("sphere");
-  shader->setUniform("Colour",0.0f,1.0f,0.0f,1.0f);
+  ngl::VAOPrimitives::draw("sphere");
+  ngl::ShaderLib::setUniform("Colour",0.0f,1.0f,0.0f,1.0f);
 
   m_transform.setScale(0.1f,0.1f,0.1f);
   m_transform.setPosition(m_spring->getInitialBPosition());
   loadMatricesToShader();
 
   // draw the sphere
-  prim->draw("sphere");
+  ngl::VAOPrimitives::draw("sphere");
 }
 
 
