@@ -18,8 +18,8 @@ RK4Spring::RK4Spring( ngl::Vec3 _a, ngl::Vec3 _b, float _length, float _k, float
 	float length=distance.length();
 	m_state.m_velocity= 0;
 
-	m_timestep=0.1;
-	m_t=0.0;
+	m_timestep=0.1f;
+	m_t=0.0f;
 	m_aFixed=false;
 	m_bFixed=false;
 }

@@ -73,10 +73,8 @@ void NGLScene::loadMatricesToShader()
   MVP=m_project*MV;
   normalMatrix=MV;
   normalMatrix.inverse().transpose();
-  ngl::ShaderLib::setUniform("MV",MV);
   ngl::ShaderLib::setUniform("MVP",MVP);
   ngl::ShaderLib::setUniform("normalMatrix",normalMatrix);
-  ngl::ShaderLib::setUniform("M",M);
 }
 
 void NGLScene::loadMatricesToColourShader()
@@ -171,6 +169,8 @@ void NGLScene::timerEvent( QTimerEvent *)
 
 NGLScene::~NGLScene()
 {
+   killTimer(m_timer);
+
 }
 
 void NGLScene::startSimTimer()
