@@ -17,6 +17,9 @@ set(TargetName MassSpring)
 find_package(NGL CONFIG REQUIRED)
 # Instruct CMake to run moc automatically when needed (Qt projects only)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${PROJECT_SOURCE_DIR}/ui)
+
 # find Qt libs
 find_package(Qt5Widgets)
 # use C++ 17
