@@ -48,4 +48,7 @@ target_sources(${TargetName} PRIVATE ${PROJECT_SOURCE_DIR}/src/main.cpp
 			${PROJECT_SOURCE_DIR}/include/NGLScene.h  
 )
 
-target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets Qt::OpenGLWidgets Qt::OpenGL)
+target_link_libraries(${TargetName} PRIVATE  NGL Qt::Widgets Qt::OpenGL)
+if ( Qt6_FOUND )
+    target_link_libraries(${TargetName} PRIVATE  Qt::OpenGLWidgets )
+endif()
