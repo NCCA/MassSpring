@@ -16,7 +16,7 @@ RK4Spring::RK4Spring( ngl::Vec3 _a, ngl::Vec3 _b, float _length, float _k, float
 
 	ngl::Vec3 distance=m_b-m_a;
 	float length=distance.length();
-	m_state.m_velocity= 0;
+	m_state.m_velocity.set(0.0f,0.0f,0.0f);
 
 	m_timestep=0.1f;
 	m_t=0.0f;
@@ -31,7 +31,7 @@ void RK4Spring::reset()
 	m_a=m_initialA;
 	m_b=m_initialB;
 	m_state.m_position=m_b-m_a;
-	m_state.m_velocity= 0;
+	m_state.m_velocity.set( 0.0f,0.0f,0.0f);
 
 
 }
